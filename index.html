@@ -34,46 +34,6 @@
       margin: 4px 0;
       color: #d1d5db;
     }
-    .report-actions {
-      position: fixed;
-      top: 18px;
-      right: 18px;
-      z-index: 99999;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: flex-end;
-      background: rgba(17, 24, 39, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 999px;
-      padding: 8px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
-      backdrop-filter: blur(8px);
-    }
-    .report-actions button {
-      appearance: none;
-      border: 0;
-      border-radius: 999px;
-      padding: 10px 14px;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      background: #ffffff;
-      color: #111827;
-      white-space: nowrap;
-    }
-    .report-actions button.secondary {
-      background: #e5e7eb;
-      color: #111827;
-    }
-    .report-actions button:hover {
-      transform: translateY(-1px);
-    }
-    @media print {
-      .report-actions {
-        display: none;
-      }
-    }
     .overview {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -207,42 +167,352 @@
       .hero h1 {
         font-size: 28px;
       }
-      .report-actions {
-        top: 10px;
-        right: 10px;
-        left: 10px;
-      }
-      .report-actions button {
-        flex: 1;
-      }
     }
   </style>
 </head>
 <body>
-  <script>
-    function downloadCurrentReport() {
-      var html = '<!doctype html>\n' + document.documentElement.outerHTML;
-      var blob = new Blob([html], { type: 'text/html' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'naz_halal_weekly_report.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-  </script>
-  <div class="report-actions" aria-label="Report download actions">
-    <button type="button" onclick="window.print()">Download PDF</button>
-    <button type="button" class="secondary" onclick="downloadCurrentReport()">Download HTML</button>
-  </div>
-
   <main class="page">
+    
+
+  <style>
+    .dash-page {
+      --dash-bg: #f5f6f8;
+      --dash-text: #111827;
+      --dash-muted: #6b7280;
+      --dash-card: #ffffff;
+      --dash-line: #e5e7eb;
+      --dash-good: #047857;
+      --dash-bad: #b91c1c;
+      --dash-flat: #4b5563;
+      color: var(--dash-text);
+    }
+    .dash-hero {
+      background: linear-gradient(135deg, #111827, #374151);
+      color: white;
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 16px 36px rgba(17, 24, 39, 0.18);
+      margin-bottom: 24px;
+    }
+    .dash-hero h1 { margin: 0 0 8px; font-size: 36px; letter-spacing: -0.04em; }
+    .dash-hero p { margin: 5px 0; color: #d1d5db; }
+    .dash-section {
+      background: var(--dash-card);
+      border-radius: 22px;
+      padding: 24px;
+      margin: 22px 0;
+      box-shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
+    }
+    .dash-combined { border: 2px solid #d1d5db; }
+    .dash-section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--dash-line);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+    .dash-section-head h2 { margin: 0; font-size: 24px; }
+    .dash-section-head p { margin: 3px 0 0; color: var(--dash-muted); }
+    .dash-metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .dash-metric-card {
+      position: relative;
+      border: 1px solid var(--dash-line);
+      border-radius: 18px;
+      padding: 18px;
+      background: #fbfbfc;
+      min-height: 150px;
+    }
+    .dash-metric-card.good { border-left: 6px solid var(--dash-good); }
+    .dash-metric-card.bad { border-left: 6px solid var(--dash-bad); }
+    .dash-metric-card.flat { border-left: 6px solid var(--dash-flat); }
+    .dash-metric-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--dash-muted);
+      font-weight: 750;
+    }
+    .dash-metric-value { font-size: 30px; font-weight: 850; margin-top: 10px; }
+    .dash-metric-meta, .dash-metric-change { color: var(--dash-muted); margin-top: 6px; font-size: 14px; }
+    .dash-trend-pill {
+      display: inline-flex;
+      margin-top: 12px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #eef2ff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .good .dash-trend-pill { color: var(--dash-good); background: #d1fae5; }
+    .bad .dash-trend-pill { color: var(--dash-bad); background: #fee2e2; }
+    .flat .dash-trend-pill { color: var(--dash-flat); background: #f3f4f6; }
+    .dash-insight-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .dash-panel { border: 1px solid var(--dash-line); border-radius: 18px; padding: 18px; overflow-x: auto; }
+    .dash-panel h3 { margin: 0 0 12px; }
+    .dash-panel span { color: var(--dash-muted); font-weight: 700; }
+    .dash-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .dash-table th { text-align: left; color: var(--dash-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .dash-table th, .dash-table td { border-bottom: 1px solid #f3f4f6; padding: 9px 8px; vertical-align: top; }
+    .dash-note { color: #d1d5db; font-size: 13px; margin-top: 18px; }
+    @media print {
+      .dash-page { page-break-after: always; break-after: page; }
+    }
+    @media (max-width: 900px) {
+      .dash-metric-grid, .dash-insight-grid { grid-template-columns: 1fr; }
+      .dash-section-head { flex-direction: column; }
+    }
+  </style>
+    
+<section class="dash-page">
+  <section class="dash-hero">
+    <h1>NHF Chargebacks Dashboard</h1>
+    <p>Current period: May 01–07, 2026</p>
+    <p>Previous period: Apr 24–30, 2026</p>
+    <p>Generated: 2026-05-09T16:11:23</p>
+    <p class="dash-note">Week-over-week comparison. The detailed weekly report starts on the next page.</p>
+  </section>
+
+  
+    <section class="dash-section dash-combined">
+      <div class="dash-section-head">
+        <h2>Combined Dashboard</h2>
+        <p>May 01–07, 2026 vs Apr 24–30, 2026</p>
+      </div>
+      <div class="dash-metric-grid">
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Operational Errors</div>
+      <div class="dash-metric-value">3</div>
+      <div class="dash-metric-meta">Previous: <strong>15</strong></div>
+      <div class="dash-metric-change">-12 / -80.0%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Error Dollars</div>
+      <div class="dash-metric-value">$46.90</div>
+      <div class="dash-metric-meta">Previous: <strong>$218.25</strong></div>
+      <div class="dash-metric-change">-$171.35 / -78.5%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+        
+    <div class="dash-metric-card bad">
+      <div class="dash-metric-title">Positive Reviews</div>
+      <div class="dash-metric-value">49</div>
+      <div class="dash-metric-meta">Previous: <strong>80</strong></div>
+      <div class="dash-metric-change">-31 / -38.8%</div>
+      <div class="dash-trend-pill">Declined</div>
+    </div>
+    
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Negative Reviews</div>
+      <div class="dash-metric-value">11</div>
+      <div class="dash-metric-meta">Previous: <strong>20</strong></div>
+      <div class="dash-metric-change">-9 / -45.0%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Matched Negative Reviews</div>
+      <div class="dash-metric-value">9</div>
+      <div class="dash-metric-meta">Previous: <strong>11</strong></div>
+      <div class="dash-metric-change">-2 / -18.2%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Unmatched Negative Reviews</div>
+      <div class="dash-metric-value">2</div>
+      <div class="dash-metric-meta">Previous: <strong>9</strong></div>
+      <div class="dash-metric-change">-7 / -77.8%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+      </div>
+    </section>
+    
+  
+    <section class="dash-section">
+      <div class="dash-section-head">
+        <h2>Wynwood - Miami</h2>
+        <p>May 01–07, 2026 vs Apr 24–30, 2026</p>
+      </div>
+      <div class="dash-metric-grid">
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Operational Errors</div>
+      <div class="dash-metric-value">0</div>
+      <div class="dash-metric-meta">Previous: <strong>5</strong></div>
+      <div class="dash-metric-change">-5 / -100.0%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Error Dollars</div>
+      <div class="dash-metric-value">$0.00</div>
+      <div class="dash-metric-meta">Previous: <strong>$41.18</strong></div>
+      <div class="dash-metric-change">-$41.18 / -100.0%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+        
+    <div class="dash-metric-card bad">
+      <div class="dash-metric-title">Positive Reviews</div>
+      <div class="dash-metric-value">21</div>
+      <div class="dash-metric-meta">Previous: <strong>51</strong></div>
+      <div class="dash-metric-change">-30 / -58.8%</div>
+      <div class="dash-trend-pill">Declined</div>
+    </div>
+    
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Negative Reviews</div>
+      <div class="dash-metric-value">4</div>
+      <div class="dash-metric-meta">Previous: <strong>11</strong></div>
+      <div class="dash-metric-change">-7 / -63.6%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+        
+    <div class="dash-metric-card flat">
+      <div class="dash-metric-title">Matched Negative Reviews</div>
+      <div class="dash-metric-value">3</div>
+      <div class="dash-metric-meta">Previous: <strong>3</strong></div>
+      <div class="dash-metric-change">0 / 0.0%</div>
+      <div class="dash-trend-pill">Flat</div>
+    </div>
+    
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Unmatched Negative Reviews</div>
+      <div class="dash-metric-value">1</div>
+      <div class="dash-metric-meta">Previous: <strong>8</strong></div>
+      <div class="dash-metric-change">-7 / -87.5%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+      </div>
+      <div class="dash-insight-grid">
+        <div class="dash-panel">
+          <h3>Top Staff Attribution</h3>
+          <p><span>Current:</span> None</p>
+          <p><span>Previous:</span> Bergson Vertus ($12.48)</p>
+        </div>
+        <div class="dash-panel">
+          <h3>Top Error Items</h3>
+          
+    <table class="dash-table">
+      <thead><tr><th>#</th><th>Current</th><th>Previous</th></tr></thead>
+      <tbody><tr><td>1</td><td>None</td><td>Naz&#x27;s Halal Nuggets (1 / $22.96)</td></tr><tr><td>2</td><td>None</td><td>Combo Over Rice (2 / $9.22)</td></tr><tr><td>3</td><td>None</td><td>Unknown Item (1 / $6.99)</td></tr></tbody>
+    </table>
+    
+        </div>
+      </div>
+    </section>
+    
+  
+    <section class="dash-section">
+      <div class="dash-section-head">
+        <h2>Fort Lauderdale</h2>
+        <p>May 01–07, 2026 vs Apr 24–30, 2026</p>
+      </div>
+      <div class="dash-metric-grid">
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Operational Errors</div>
+      <div class="dash-metric-value">3</div>
+      <div class="dash-metric-meta">Previous: <strong>10</strong></div>
+      <div class="dash-metric-change">-7 / -70.0%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Error Dollars</div>
+      <div class="dash-metric-value">$46.90</div>
+      <div class="dash-metric-meta">Previous: <strong>$177.07</strong></div>
+      <div class="dash-metric-change">-$130.17 / -73.5%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+        
+    <div class="dash-metric-card bad">
+      <div class="dash-metric-title">Positive Reviews</div>
+      <div class="dash-metric-value">28</div>
+      <div class="dash-metric-meta">Previous: <strong>29</strong></div>
+      <div class="dash-metric-change">-1 / -3.4%</div>
+      <div class="dash-trend-pill">Declined</div>
+    </div>
+    
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Negative Reviews</div>
+      <div class="dash-metric-value">7</div>
+      <div class="dash-metric-meta">Previous: <strong>9</strong></div>
+      <div class="dash-metric-change">-2 / -22.2%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+        
+    <div class="dash-metric-card good">
+      <div class="dash-metric-title">Matched Negative Reviews</div>
+      <div class="dash-metric-value">6</div>
+      <div class="dash-metric-meta">Previous: <strong>8</strong></div>
+      <div class="dash-metric-change">-2 / -25.0%</div>
+      <div class="dash-trend-pill">Improved</div>
+    </div>
+    
+        
+    <div class="dash-metric-card flat">
+      <div class="dash-metric-title">Unmatched Negative Reviews</div>
+      <div class="dash-metric-value">1</div>
+      <div class="dash-metric-meta">Previous: <strong>1</strong></div>
+      <div class="dash-metric-change">0 / 0.0%</div>
+      <div class="dash-trend-pill">Flat</div>
+    </div>
+    
+      </div>
+      <div class="dash-insight-grid">
+        <div class="dash-panel">
+          <h3>Top Staff Attribution</h3>
+          <p><span>Current:</span> John Desir ($22.46)</p>
+          <p><span>Previous:</span> John Desir ($63.73)</p>
+        </div>
+        <div class="dash-panel">
+          <h3>Top Error Items</h3>
+          
+    <table class="dash-table">
+      <thead><tr><th>#</th><th>Current</th><th>Previous</th></tr></thead>
+      <tbody><tr><td>1</td><td>Unknown Item (1 / $14.97)</td><td>Naz&#x27;s Gyros (2 / $71.96)</td></tr><tr><td>2</td><td>BBQ Wings (1 / $12.97)</td><td>Naz&#x27;s Lite Platters (3 / $38.61)</td></tr><tr><td>3</td><td>Jupina (1 / $12.97)</td><td>Unknown Item (1 / $20.97)</td></tr></tbody>
+    </table>
+    
+        </div>
+      </div>
+    </section>
+    
+</section>
+    
     <section class="hero">
       <h1>Naz's Halal Weekly Report</h1>
       <p>Period: May 01–07, 2026</p>
-      <p>Generated: 2026-05-09T14:26:21</p>
+      <p>Generated: 2026-05-09T16:11:23</p>
 
       <div class="overview">
         <div class="overview-card">
@@ -415,7 +685,7 @@
       </div>
 
       <div class="panel">
-        <h3>All Negative Reviews</h3>
+        <h3>Matched Negative Reviews</h3>
         <table>
           <thead>
             <tr>
@@ -423,7 +693,6 @@
               <th>Platform</th>
               <th>Rating</th>
               <th>Review / Tag</th>
-              <th>Matched?</th>
               <th>Staff</th>
               <th>Error $</th>
               <th>Fulfilled</th>
@@ -435,22 +704,9 @@
           <td>DoorDash</td>
           <td>2</td>
           <td>Bad quality</td>
-          <td>Yes</td>
           <td>Judelande Joseph, Ryan Labissiere</td>
           <td></td>
           <td>May 04, 2026 01:10 AM</td>
-        </tr>
-        
-
-        <tr>
-          <td>A00C9DDB</td>
-          <td>DoorDash</td>
-          <td>2</td>
-          <td>Bad quality</td>
-          <td>No</td>
-          <td>Unmatched</td>
-          <td></td>
-          <td></td>
         </tr>
         
 
@@ -459,7 +715,6 @@
           <td>DoorDash</td>
           <td>2</td>
           <td></td>
-          <td>Yes</td>
           <td>Prince Florestal</td>
           <td></td>
           <td>May 04, 2026 07:47 PM</td>
@@ -471,7 +726,6 @@
           <td>Uber Eats</td>
           <td>1</td>
           <td>Too slow — So inconsistent on the portions and the pickup time for fucks sake fix it</td>
-          <td>Yes</td>
           <td>Luis Arteaga</td>
           <td></td>
           <td>May 05, 2026 04:32 PM</td>
@@ -739,7 +993,7 @@ BBQ Wings x2 - Food Prepared Unsafely</td>
       </div>
 
       <div class="panel">
-        <h3>All Negative Reviews</h3>
+        <h3>Matched Negative Reviews</h3>
         <table>
           <thead>
             <tr>
@@ -747,7 +1001,6 @@ BBQ Wings x2 - Food Prepared Unsafely</td>
               <th>Platform</th>
               <th>Rating</th>
               <th>Review / Tag</th>
-              <th>Matched?</th>
               <th>Staff</th>
               <th>Error $</th>
               <th>Fulfilled</th>
@@ -759,7 +1012,6 @@ BBQ Wings x2 - Food Prepared Unsafely</td>
           <td>Uber Eats</td>
           <td>1</td>
           <td>Not so tasty</td>
-          <td>Yes</td>
           <td>John Desir, Nash Pericles</td>
           <td></td>
           <td>May 02, 2026 12:25 AM</td>
@@ -771,7 +1023,6 @@ BBQ Wings x2 - Food Prepared Unsafely</td>
           <td>DoorDash</td>
           <td>2</td>
           <td>Bland flavor</td>
-          <td>Yes</td>
           <td>Tatiana Grondona</td>
           <td></td>
           <td>May 02, 2026 03:24 PM</td>
@@ -783,22 +1034,9 @@ BBQ Wings x2 - Food Prepared Unsafely</td>
           <td>DoorDash</td>
           <td>2</td>
           <td>Bad quality</td>
-          <td>Yes</td>
           <td>John Desir, Nash Pericles</td>
           <td></td>
           <td>May 05, 2026 12:43 AM</td>
-        </tr>
-        
-
-        <tr>
-          <td>341125C0</td>
-          <td>DoorDash</td>
-          <td>2</td>
-          <td>that wasnt an extra protien!!</td>
-          <td>No</td>
-          <td>Unmatched</td>
-          <td></td>
-          <td></td>
         </tr>
         
 
@@ -807,7 +1045,6 @@ BBQ Wings x2 - Food Prepared Unsafely</td>
           <td>DoorDash</td>
           <td>2</td>
           <td>Bad quality, Bad value — I tried this place once again and the rice is undercooked it&#x27;s hard like a rock on BOTH platers</td>
-          <td>Yes</td>
           <td>Unattributed</td>
           <td></td>
           <td>May 01, 2026 01:23 AM</td>
@@ -819,7 +1056,6 @@ BBQ Wings x2 - Food Prepared Unsafely</td>
           <td>DoorDash</td>
           <td>2</td>
           <td>whydid I got chickenwings</td>
-          <td>Yes</td>
           <td>John Desir, Nash Pericles</td>
           <td></td>
           <td>May 02, 2026 01:46 AM</td>
@@ -831,7 +1067,6 @@ BBQ Wings x2 - Food Prepared Unsafely</td>
           <td>Uber Eats</td>
           <td>1</td>
           <td>Missed order notes, Unsustainable packaging</td>
-          <td>Yes</td>
           <td>John Desir, Tatiana Grondona</td>
           <td></td>
           <td>May 03, 2026 02:49 PM</td>
