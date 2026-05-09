@@ -1,12 +1,846 @@
+
 <!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NHF Weekly Report</title>
+  <title>Naz's Halal Weekly Report</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f6f7f9;
+      color: #17202a;
+    }
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #111827, #374151);
+      color: white;
+      border-radius: 22px;
+      padding: 30px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 28px rgba(17, 24, 39, 0.18);
+    }
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      letter-spacing: -0.03em;
+    }
+    .hero p {
+      margin: 4px 0;
+      color: #d1d5db;
+    }
+    .report-actions {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 99999;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      padding: 8px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(8px);
+    }
+    .report-actions button {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #ffffff;
+      color: #111827;
+      white-space: nowrap;
+    }
+    .report-actions button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .report-actions button:hover {
+      transform: translateY(-1px);
+    }
+    @media print {
+      .report-actions {
+        display: none;
+      }
+    }
+    .overview {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+    .overview-card {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .overview-card .label {
+      color: #d1d5db;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .overview-card .value {
+      font-size: 28px;
+      font-weight: 800;
+      margin-top: 6px;
+    }
+    .location-section {
+      background: white;
+      border-radius: 22px;
+      padding: 24px;
+      margin: 24px 0;
+      box-shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 16px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+    }
+    .section-header h2 {
+      margin: 0;
+      font-size: 26px;
+    }
+    .section-header p {
+      margin: 4px 0 0;
+      color: #6b7280;
+    }
+    .badge {
+      background: #fee2e2;
+      color: #991b1b;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .label {
+      color: #6b7280;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .value {
+      font-size: 26px;
+      font-weight: 800;
+      margin-top: 6px;
+    }
+    .danger { color: #b91c1c; }
+    .warning { color: #b45309; }
+    .positive { color: #047857; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .panel {
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 18px;
+      background: #ffffff;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .panel h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th {
+      text-align: left;
+      color: #6b7280;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 9px 8px;
+      white-space: nowrap;
+    }
+    td {
+      border-bottom: 1px solid #f3f4f6;
+      padding: 10px 8px;
+      vertical-align: top;
+    }
+    ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    li {
+      margin: 6px 0;
+    }
+    @media (max-width: 850px) {
+      .overview, .cards, .grid {
+        grid-template-columns: 1fr;
+      }
+      .hero h1 {
+        font-size: 28px;
+      }
+      .report-actions {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+      }
+      .report-actions button {
+        flex: 1;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>NHF Weekly Report</h1>
-  <p>The weekly report will be published here after the first automated run.</p>
+  <script>
+    function downloadCurrentReport() {
+      var html = '<!doctype html>\n' + document.documentElement.outerHTML;
+      var blob = new Blob([html], { type: 'text/html' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'naz_halal_weekly_report.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+  <div class="report-actions" aria-label="Report download actions">
+    <button type="button" onclick="window.print()">Download PDF</button>
+    <button type="button" class="secondary" onclick="downloadCurrentReport()">Download HTML</button>
+  </div>
+
+  <main class="page">
+    <section class="hero">
+      <h1>Naz's Halal Weekly Report</h1>
+      <p>Period: May 01–07, 2026</p>
+      <p>Generated: 2026-05-09T13:21:10</p>
+
+      <div class="overview">
+        <div class="overview-card">
+          <div class="label">Operational Errors</div>
+          <div class="value">3</div>
+        </div>
+        <div class="overview-card">
+          <div class="label">Error Dollars</div>
+          <div class="value">$46.90</div>
+        </div>
+        <div class="overview-card">
+          <div class="label">Positive Reviews</div>
+          <div class="value">49</div>
+        </div>
+        <div class="overview-card">
+          <div class="label">Negative Reviews</div>
+          <div class="value">11</div>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="location-section">
+      <div class="section-header">
+        <div>
+          <h2>Wynwood – Miami</h2>
+          <p>May 01–07, 2026</p>
+        </div>
+        <div class="badge">0 flags</div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="label">Operational Errors</div>
+          <div class="value">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Error Dollars</div>
+          <div class="value danger">$0.00</div>
+        </div>
+        <div class="card">
+          <div class="label">Positive Reviews</div>
+          <div class="value positive">21</div>
+        </div>
+        <div class="card">
+          <div class="label">Negative Reviews</div>
+          <div class="value warning">4</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Needs Attention</h3>
+          <ul><li>No major flags.</li></ul>
+        </div>
+
+        <div class="panel">
+          <h3>Review Matching</h3>
+          <p><strong>3</strong> negative reviews matched to Otter orders</p>
+          <p><strong>1</strong> unmatched negative reviews</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Platform Error Breakdown</h3>
+          <table>
+            <thead><tr><th>Platform</th><th>Errors</th><th>Amount</th></tr></thead>
+            <tbody><tr><td colspan="3">None</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <h3>Staff Error Attribution</h3>
+          <table>
+            <thead><tr><th>Staff</th><th>Amount</th></tr></thead>
+            <tbody><tr><td colspan="2">None</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Negative Review Themes</h3>
+          <table>
+            <thead><tr><th>Theme</th><th>Count</th></tr></thead>
+            <tbody>
+        <tr>
+          <td>Bad quality</td>
+          <td>2</td>
+        </tr>
+        
+
+        <tr>
+          <td>Too slow</td>
+          <td>1</td>
+        </tr>
+        </tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <h3>Positive Review Themes</h3>
+          <table>
+            <thead><tr><th>Theme</th><th>Count</th></tr></thead>
+            <tbody>
+        <tr>
+          <td>Consistent</td>
+          <td>4</td>
+        </tr>
+        
+
+        <tr>
+          <td>Excellent quality</td>
+          <td>3</td>
+        </tr>
+        
+
+        <tr>
+          <td>Flavorful</td>
+          <td>3</td>
+        </tr>
+        
+
+        <tr>
+          <td>Great value</td>
+          <td>3</td>
+        </tr>
+        
+
+        <tr>
+          <td>Convenient</td>
+          <td>2</td>
+        </tr>
+        
+
+        <tr>
+          <td>Great packaging</td>
+          <td>2</td>
+        </tr>
+        </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Top Error Items</h3>
+        <table>
+          <thead><tr><th>Item</th><th>Error Count</th><th>Amount</th></tr></thead>
+          <tbody><tr><td colspan="3">None</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>All Operational Errors</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Amount</th>
+              <th>Platform</th>
+              <th>Reason</th>
+              <th>Items</th>
+              <th>Staff</th>
+              <th>Fulfilled</th>
+            </tr>
+          </thead>
+          <tbody><tr><td colspan="7">None</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>All Negative Reviews</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Platform</th>
+              <th>Rating</th>
+              <th>Review / Tag</th>
+              <th>Matched?</th>
+              <th>Staff</th>
+              <th>Error $</th>
+              <th>Fulfilled</th>
+            </tr>
+          </thead>
+          <tbody>
+        <tr>
+          <td>D4E62879</td>
+          <td>DoorDash</td>
+          <td>2</td>
+          <td>Bad quality</td>
+          <td>Yes</td>
+          <td>Judelande Joseph, Ryan Labissiere</td>
+          <td></td>
+          <td>May 04, 2026 01:10 AM</td>
+        </tr>
+        
+
+        <tr>
+          <td>A00C9DDB</td>
+          <td>DoorDash</td>
+          <td>2</td>
+          <td>Bad quality</td>
+          <td>No</td>
+          <td>Unmatched</td>
+          <td></td>
+          <td></td>
+        </tr>
+        
+
+        <tr>
+          <td>CBBF9181</td>
+          <td>DoorDash</td>
+          <td>2</td>
+          <td></td>
+          <td>Yes</td>
+          <td>Prince Florestal</td>
+          <td></td>
+          <td>May 04, 2026 07:47 PM</td>
+        </tr>
+        
+
+        <tr>
+          <td>4DF8B</td>
+          <td>Uber Eats</td>
+          <td>1</td>
+          <td>Too slow — So inconsistent on the portions and the pickup time for fucks sake fix it</td>
+          <td>Yes</td>
+          <td>Luis Arteaga</td>
+          <td></td>
+          <td>May 05, 2026 04:32 PM</td>
+        </tr>
+        </tbody>
+        </table>
+      </div>
+    </section>
+    
+    
+    <section class="location-section">
+      <div class="section-header">
+        <div>
+          <h2>Fort Lauderdale</h2>
+          <p>May 01–07, 2026</p>
+        </div>
+        <div class="badge">0 flags</div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="label">Operational Errors</div>
+          <div class="value">3</div>
+        </div>
+        <div class="card">
+          <div class="label">Error Dollars</div>
+          <div class="value danger">$46.90</div>
+        </div>
+        <div class="card">
+          <div class="label">Positive Reviews</div>
+          <div class="value positive">28</div>
+        </div>
+        <div class="card">
+          <div class="label">Negative Reviews</div>
+          <div class="value warning">7</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Needs Attention</h3>
+          <ul><li>No major flags.</li></ul>
+        </div>
+
+        <div class="panel">
+          <h3>Review Matching</h3>
+          <p><strong>6</strong> negative reviews matched to Otter orders</p>
+          <p><strong>1</strong> unmatched negative reviews</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Platform Error Breakdown</h3>
+          <table>
+            <thead><tr><th>Platform</th><th>Errors</th><th>Amount</th></tr></thead>
+            <tbody>
+        <tr>
+          <td>DoorDash</td>
+          <td>2</td>
+          <td>$31.93</td>
+        </tr>
+        
+
+        <tr>
+          <td>Direct Orders - Kitchens</td>
+          <td>1</td>
+          <td>$14.97</td>
+        </tr>
+        </tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <h3>Staff Error Attribution</h3>
+          <table>
+            <thead><tr><th>Staff</th><th>Amount</th></tr></thead>
+            <tbody>
+        <tr>
+          <td>John Desir</td>
+          <td>$22.46</td>
+        </tr>
+        
+
+        <tr>
+          <td>Nash Pericles</td>
+          <td>$22.46</td>
+        </tr>
+        
+
+        <tr>
+          <td>Shaikh Ahmed Shaikh</td>
+          <td>$2.00</td>
+        </tr>
+        </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Negative Review Themes</h3>
+          <table>
+            <thead><tr><th>Theme</th><th>Count</th></tr></thead>
+            <tbody>
+        <tr>
+          <td>Bad quality</td>
+          <td>2</td>
+        </tr>
+        
+
+        <tr>
+          <td>Bad value</td>
+          <td>1</td>
+        </tr>
+        
+
+        <tr>
+          <td>Bland flavor</td>
+          <td>1</td>
+        </tr>
+        
+
+        <tr>
+          <td>Late/Slow</td>
+          <td>1</td>
+        </tr>
+        
+
+        <tr>
+          <td>Missed order notes</td>
+          <td>1</td>
+        </tr>
+        
+
+        <tr>
+          <td>Not so tasty</td>
+          <td>1</td>
+        </tr>
+        </tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <h3>Positive Review Themes</h3>
+          <table>
+            <thead><tr><th>Theme</th><th>Count</th></tr></thead>
+            <tbody>
+        <tr>
+          <td>Consistent</td>
+          <td>8</td>
+        </tr>
+        
+
+        <tr>
+          <td>Great selection</td>
+          <td>5</td>
+        </tr>
+        
+
+        <tr>
+          <td>Convenient</td>
+          <td>4</td>
+        </tr>
+        
+
+        <tr>
+          <td>Good flavor</td>
+          <td>4</td>
+        </tr>
+        
+
+        <tr>
+          <td>Reliable service</td>
+          <td>4</td>
+        </tr>
+        
+
+        <tr>
+          <td>Solid value</td>
+          <td>4</td>
+        </tr>
+        </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Top Error Items</h3>
+        <table>
+          <thead><tr><th>Item</th><th>Error Count</th><th>Amount</th></tr></thead>
+          <tbody>
+        <tr>
+          <td>Unknown Item</td>
+          <td>1</td>
+          <td>$14.97</td>
+        </tr>
+        
+
+        <tr>
+          <td>BBQ Wings</td>
+          <td>1</td>
+          <td>$12.97</td>
+        </tr>
+        
+
+        <tr>
+          <td>Jupina</td>
+          <td>1</td>
+          <td>$12.97</td>
+        </tr>
+        </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>All Operational Errors</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Amount</th>
+              <th>Platform</th>
+              <th>Reason</th>
+              <th>Items</th>
+              <th>Staff</th>
+              <th>Fulfilled</th>
+            </tr>
+          </thead>
+          <tbody>
+        <tr>
+          <td>C40B96FA</td>
+          <td>$25.94</td>
+          <td>DoorDash</td>
+          <td>Missing Items</td>
+          <td>Jupina x2 - Food Prepared Unsafely
+BBQ Wings x2 - Food Prepared Unsafely</td>
+          <td>John Desir, Nash Pericles</td>
+          <td>May 02, 2026 01:48 AM</td>
+        </tr>
+        
+
+        <tr>
+          <td>BO6F4</td>
+          <td>$14.97</td>
+          <td>Direct Orders - Kitchens</td>
+          <td>Unmatched Otter Error</td>
+          <td></td>
+          <td>John Desir, Nash Pericles</td>
+          <td>May 02, 2026 03:58 AM</td>
+        </tr>
+        
+
+        <tr>
+          <td>886B11F1</td>
+          <td>$5.99</td>
+          <td>DoorDash</td>
+          <td>Missing Items</td>
+          <td>Ube Cheesecake x1 - Missing Item</td>
+          <td>John Desir, Nash Pericles, Shaikh Ahmed Shaikh</td>
+          <td>May 01, 2026 11:29 PM</td>
+        </tr>
+        </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>All Negative Reviews</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Platform</th>
+              <th>Rating</th>
+              <th>Review / Tag</th>
+              <th>Matched?</th>
+              <th>Staff</th>
+              <th>Error $</th>
+              <th>Fulfilled</th>
+            </tr>
+          </thead>
+          <tbody>
+        <tr>
+          <td>56153</td>
+          <td>Uber Eats</td>
+          <td>1</td>
+          <td>Not so tasty</td>
+          <td>Yes</td>
+          <td>John Desir, Nash Pericles</td>
+          <td></td>
+          <td>May 02, 2026 12:25 AM</td>
+        </tr>
+        
+
+        <tr>
+          <td>9CB50CC7</td>
+          <td>DoorDash</td>
+          <td>2</td>
+          <td>Bland flavor</td>
+          <td>Yes</td>
+          <td>Tatiana Grondona</td>
+          <td></td>
+          <td>May 02, 2026 03:24 PM</td>
+        </tr>
+        
+
+        <tr>
+          <td>0765654C</td>
+          <td>DoorDash</td>
+          <td>2</td>
+          <td>Bad quality</td>
+          <td>Yes</td>
+          <td>John Desir, Nash Pericles</td>
+          <td></td>
+          <td>May 05, 2026 12:43 AM</td>
+        </tr>
+        
+
+        <tr>
+          <td>341125C0</td>
+          <td>DoorDash</td>
+          <td>2</td>
+          <td>that wasnt an extra protien!!</td>
+          <td>No</td>
+          <td>Unmatched</td>
+          <td></td>
+          <td></td>
+        </tr>
+        
+
+        <tr>
+          <td>2D9939FB</td>
+          <td>DoorDash</td>
+          <td>2</td>
+          <td>Bad quality, Bad value — I tried this place once again and the rice is undercooked it&#x27;s hard like a rock on BOTH platers</td>
+          <td>Yes</td>
+          <td>Unattributed</td>
+          <td></td>
+          <td>May 01, 2026 01:23 AM</td>
+        </tr>
+        
+
+        <tr>
+          <td>751AC78D</td>
+          <td>DoorDash</td>
+          <td>2</td>
+          <td>whydid I got chickenwings</td>
+          <td>Yes</td>
+          <td>John Desir, Nash Pericles</td>
+          <td></td>
+          <td>May 02, 2026 01:46 AM</td>
+        </tr>
+        
+
+        <tr>
+          <td>19517</td>
+          <td>Uber Eats</td>
+          <td>1</td>
+          <td>Missed order notes, Unsustainable packaging</td>
+          <td>Yes</td>
+          <td>John Desir, Tatiana Grondona</td>
+          <td></td>
+          <td>May 03, 2026 02:49 PM</td>
+        </tr>
+        </tbody>
+        </table>
+      </div>
+    </section>
+    
+  </main>
 </body>
 </html>
